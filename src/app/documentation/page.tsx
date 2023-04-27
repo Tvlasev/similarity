@@ -2,9 +2,9 @@ import LargeHeading from "@/components/common/LargeHeading";
 import Paragraph from "@/components/common/Paragraph";
 import { FC } from "react";
 import "simplebar-react/dist/simplebar.min.css";
-
 import DocumentationTabs from '@/components/DocumentationTabs'
 import type { Metadata } from "next";
+import "simplebar-react/dist/simplebar.min.css";
 
 export const metadata: Metadata = {
   title: "Similarity API | Documentation",
