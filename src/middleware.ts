@@ -4,15 +4,20 @@ import { NextResponse } from "next/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
-const redis = new Redis({
-  url: process.env.REDIS_URL,
-  token: process.env.REDIS_SECRET,
-});
+const redis =
+  process.env.REDIS_URL &&
+  process.env.REDIS_SECRET &&
+  new Redis({
+    url: process.env.REDIS_URL,
+    token: process.env.REDIS_SECRET,
+  });
 
-const ratelimit = new Ratelimit({
-  redis: redis,
-  limiter: Ratelimit.slidingWindow(50, "1 h"),
-});
+const ratelimit =
+  redis &&
+  new Ratelimit({
+    redis: redis,
+    limiter: Ratelimit.slidingWindow(50, "1 h"),
+  });
 
 export default withAuth(
   async function middleware(req) {
@@ -22,9 +27,12 @@ export default withAuth(
     if (pathname.startsWith("/api")) {
       const ip = req.ip ?? "127.0.0.1";
       try {
-        const { success } = await ratelimit.limit(ip);
-
+        const success = undefined;
         if (!success) return NextResponse.json({ error: "Too Many Requests" });
+        const successReq = ratelimit && (await ratelimit.limit(ip));
+
+        if (!successReq)
+          return NextResponse.json({ error: "Too Many Requests" });
         return NextResponse.next();
       } catch (error) {
         return NextResponse.json({ error: "Internal Server Error" });
